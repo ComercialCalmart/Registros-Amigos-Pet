@@ -39,7 +39,7 @@
   header{
     position:sticky;top:0;z-index:20;
     background:var(--bg);
-    padding:14px 16px 10px;
+    padding:calc(14px + env(safe-area-inset-top)) 16px 10px;
     border-bottom:1px solid var(--line);
   }
   header .wrap{padding:0;}
