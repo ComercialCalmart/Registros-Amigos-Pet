@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<link rel="manifest" href="manifest.json">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Amigos Pet">
+<meta name="theme-color" content="#F6F5F2">
+<title>Captura · Amigos Pet</title>
+<style>
+  :root{
+    --bg:#F6F5F2;
+    --card:#FFFFFF;
+    --ink:#1C1C1A;
+    --ink-soft:#6B6B66;
+    --line:#E5E3DD;
+    --accent:#D9531E;
+    --accent-ink:#FFFFFF;
+    --seller:#2563EB;
+    --lojista:#16A34A;
+    --outro:#B45309;
+    --danger:#B91C1C;
+    --radius:14px;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--bg);
+    color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    font-size:16px;
+    -webkit-font-smoothing:antialiased;
+    padding-bottom:96px;
+  }
+  .wrap{max-width:480px;margin:0 auto;padding:0 16px;}
+
+  header{
+    position:sticky;top:0;z-index:20;
+    background:var(--bg);
+    padding:14px 16px 10px;
+    border-bottom:1px solid var(--line);
+  }
+  header .wrap{padding:0;}
+  .title-row{display:flex;align-items:baseline;justify-content:space-between;gap:8px;}
+  h1{font-size:1.15rem;margin:0;font-weight:700;letter-spacing:-0.01em;}
+  .count-chip{
+    background:var(--ink);color:#fff;font-size:0.72rem;font-weight:600;
+    padding:4px 9px;border-radius:999px;white-space:nowrap;
+  }
+  .subtitle{font-size:0.78rem;color:var(--ink-soft);margin-top:2px;}
+
+  .tabs{display:flex;gap:6px;margin-top:12px;}
+  .tab-btn{
+    flex:1;padding:10px 0;text-align:center;font-size:0.88rem;font-weight:600;
+    background:transparent;border:1px solid var(--line);border-radius:10px;
+    color:var(--ink-soft);cursor:pointer;
+  }
+  .tab-btn.active{background:var(--ink);color:#fff;border-color:var(--ink);}
+
+  main{padding-top:14px;}
+  section{display:none;}
+  section.active{display:block;}
+
+  .field{margin-bottom:14px;}
+  label{
+    display:block;font-size:0.78rem;font-weight:600;color:var(--ink-soft);
+    margin-bottom:6px;text-transform:uppercase;letter-spacing:.03em;
+  }
+  input[type=text],input[type=tel],textarea{
+    width:100%;padding:12px 13px;border:1px solid var(--line);border-radius:10px;
+    font-size:1rem;background:var(--card);color:var(--ink);font-family:inherit;
+  }
+  input:focus,textarea:focus{outline:2px solid var(--accent);outline-offset:1px;}
+  textarea{resize:vertical;min-height:64px;}
+
+  .foco-row{display:flex;gap:8px;}
+  .foco-btn{
+    flex:1;padding:14px 0;border-radius:10px;border:1.5px solid var(--line);
+    background:var(--card);font-weight:700;font-size:0.85rem;letter-spacing:.02em;
+    color:var(--ink-soft);cursor:pointer;
+  }
+  .foco-btn[data-foco="SELLER"].active{background:var(--seller);border-color:var(--seller);color:#fff;}
+  .foco-btn[data-foco="LOJISTA"].active{background:var(--lojista);border-color:var(--lojista);color:#fff;}
+  .foco-btn[data-foco="OUTRO"].active{background:var(--outro);border-color:var(--outro);color:#fff;}
+
+  .edit-banner{
+    background:#FFF4E8;border:1px solid #F0CBA0;color:#7A4A0E;
+    padding:9px 12px;border-radius:10px;font-size:0.82rem;font-weight:600;
+    margin-bottom:14px;display:flex;justify-content:space-between;align-items:center;gap:8px;
+  }
+  .edit-banner button{
+    background:transparent;border:none;color:#7A4A0E;font-weight:700;font-size:0.8rem;
+    text-decoration:underline;cursor:pointer;padding:0;
+  }
+
+  .bottom-bar{
+    position:fixed;left:0;right:0;bottom:0;z-index:30;
+    background:var(--bg);border-top:1px solid var(--line);
+    padding:10px 16px calc(10px + env(safe-area-inset-bottom));
+  }
+  .bottom-bar .wrap{padding:0;display:flex;gap:8px;}
+  .btn-primary{
+    flex:1;padding:14px 0;border-radius:12px;border:none;
+    background:var(--accent);color:var(--accent-ink);font-weight:700;font-size:1rem;
+    cursor:pointer;
+  }
+  .btn-ghost{
+    padding:14px 18px;border-radius:12px;border:1px solid var(--line);
+    background:var(--card);color:var(--danger);font-weight:700;font-size:0.9rem;cursor:pointer;
+  }
+
+  .search-row{display:flex;gap:8px;margin-bottom:10px;}
+  .search-row input{flex:1;}
+  .filter-row{display:flex;gap:6px;margin-bottom:14px;flex-wrap:wrap;}
+  .filter-chip{
+    padding:7px 12px;border-radius:999px;border:1px solid var(--line);
+    background:var(--card);font-size:0.78rem;font-weight:600;color:var(--ink-soft);cursor:pointer;
+  }
+  .filter-chip.active{background:var(--ink);color:#fff;border-color:var(--ink);}
+
+  .lead-card{
+    background:var(--card);border:1px solid var(--line);border-radius:var(--radius);
+    padding:13px 14px;margin-bottom:10px;cursor:pointer;
+  }
+  .lead-top{display:flex;justify-content:space-between;align-items:flex-start;gap:8px;}
+  .lead-name{font-weight:700;font-size:0.98rem;}
+  .lead-sub{font-size:0.82rem;color:var(--ink-soft);margin-top:2px;}
+  .badge{
+    font-size:0.68rem;font-weight:700;padding:3px 8px;border-radius:999px;color:#fff;
+    white-space:nowrap;flex-shrink:0;
+  }
+  .badge.SELLER{background:var(--seller);}
+  .badge.LOJISTA{background:var(--lojista);}
+  .badge.OUTRO{background:var(--outro);}
+  .lead-detail{margin-top:8px;padding-top:8px;border-top:1px dashed var(--line);font-size:0.85rem;color:var(--ink-soft);display:none;}
+  .lead-card.open .lead-detail{display:block;}
+  .lead-detail div{margin-bottom:3px;}
+  .lead-actions{display:flex;gap:8px;margin-top:10px;}
+  .lead-actions button{
+    flex:1;padding:8px 0;border-radius:8px;border:1px solid var(--line);
+    background:var(--bg);font-size:0.8rem;font-weight:600;cursor:pointer;
+  }
+  .lead-actions .del{color:var(--danger);}
+
+  .empty{text-align:center;padding:40px 20px;color:var(--ink-soft);font-size:0.9rem;}
+
+  .toast{
+    position:fixed;bottom:84px;left:50%;transform:translateX(-50%) translateY(20px);
+    background:var(--ink);color:#fff;padding:10px 18px;border-radius:999px;
+    font-size:0.85rem;font-weight:600;opacity:0;transition:opacity .2s, transform .2s;
+    z-index:50;pointer-events:none;
+  }
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+
+  .list-footer{display:flex;gap:8px;margin-top:6px;margin-bottom:20px;}
+  .list-footer button{flex:1;}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap">
+    <div class="title-row">
+      <h1>🐾 Captura · Amigos Pet</h1>
+      <span class="count-chip" id="countChip">0 contatos</span>
+    </div>
+    <div class="subtitle">Funciona 100% offline · salvo neste aparelho</div>
+    <div class="tabs">
+      <button class="tab-btn active" data-tab="novo">+ Novo</button>
+      <button class="tab-btn" data-tab="lista">Lista</button>
+    </div>
+  </div>
+</header>
+
+<main class="wrap">
+
+  <section id="tab-novo" class="active">
+    <div id="editBanner" class="edit-banner" style="display:none;">
+      <span>Editando contato</span>
+      <button id="cancelEdit">cancelar e criar novo</button>
+    </div>
+
+    <div class="field">
+      <label>Foco</label>
+      <div class="foco-row">
+        <button class="foco-btn" data-foco="SELLER">SELLER</button>
+        <button class="foco-btn" data-foco="LOJISTA">LOJISTA</button>
+        <button class="foco-btn" data-foco="OUTRO">OUTRO</button>
+      </div>
+    </div>
+
+    <div class="field">
+      <label>Nome</label>
+      <input type="text" id="f-nome" placeholder="Nome da pessoa">
+    </div>
+
+    <div class="field">
+      <label>Telefone</label>
+      <input type="tel" inputmode="tel" id="f-telefone" placeholder="(11) 9....">
+    </div>
+
+    <div class="field">
+      <label>Empresa</label>
+      <input type="text" id="f-empresa" placeholder="Nome da empresa">
+    </div>
+
+    <div class="field">
+      <label>Cidade</label>
+      <input type="text" id="f-cidade" placeholder="Cidade / UF">
+    </div>
+
+    <div class="field">
+      <label>Site</label>
+      <input type="text" id="f-site" placeholder="site.com.br">
+    </div>
+
+    <div class="field">
+      <label>Mercado Livre</label>
+      <input type="text" id="f-meli" placeholder="loja ou link no ML">
+    </div>
+
+    <div class="field">
+      <label>Amazon</label>
+      <input type="text" id="f-amazon" placeholder="loja ou link na Amazon">
+    </div>
+
+    <div class="field">
+      <label>Obs</label>
+      <textarea id="f-obs" placeholder="Qualquer detalhe que ajude depois"></textarea>
+    </div>
+  </section>
+
+  <section id="tab-lista">
+    <div class="search-row">
+      <input type="text" id="searchInput" placeholder="Buscar nome, empresa, cidade...">
+    </div>
+    <div class="filter-row">
+      <button class="filter-chip active" data-filter="ALL">Todos</button>
+      <button class="filter-chip" data-filter="SELLER">Seller</button>
+      <button class="filter-chip" data-filter="LOJISTA">Lojista</button>
+      <button class="filter-chip" data-filter="OUTRO">Outro</button>
+    </div>
+    <div id="leadList"></div>
+    <div class="list-footer">
+      <button class="btn-ghost" id="clearAllBtn" style="flex:1;">Limpar tudo</button>
+    </div>
+  </section>
+
+</main>
+
+<div class="bottom-bar">
+  <div class="wrap">
+    <button class="btn-primary" id="saveBtn">Salvar contato</button>
+    <button class="btn-primary" id="exportBtn" style="background:var(--ink);">Exportar CSV</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const STORAGE_KEY = 'amigospet_leads_v1';
+let leads = [];
+let editingId = null;
+let activeFilter = 'ALL';
+
+function loadLeads(){
+  try{
+    const raw = localStorage.getItem(STORAGE_KEY);
+    leads = raw ? JSON.parse(raw) : [];
+  }catch(e){ leads = []; }
+}
+function persist(){
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(leads));
+  updateCount();
+}
+function updateCount(){
+  document.getElementById('countChip').textContent = leads.length + (leads.length===1 ? ' contato' : ' contatos');
+}
+
+function showToast(msg){
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'), 1600);
+}
+
+// Tabs
+document.querySelectorAll('.tab-btn').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+    document.querySelectorAll('main section').forEach(s=>s.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('tab-'+btn.dataset.tab).classList.add('active');
+    if(btn.dataset.tab === 'lista'){ renderList(); }
+  });
+});
+
+// Foco toggle
+document.querySelectorAll('.foco-btn').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    const already = btn.classList.contains('active');
+    document.querySelectorAll('.foco-btn').forEach(b=>b.classList.remove('active'));
+    if(!already) btn.classList.add('active');
+  });
+});
+function getFoco(){
+  const active = document.querySelector('.foco-btn.active');
+  return active ? active.dataset.foco : '';
+}
+function setFoco(val){
+  document.querySelectorAll('.foco-btn').forEach(b=>{
+    b.classList.toggle('active', b.dataset.foco === val);
+  });
+}
+
+function clearForm(){
+  ['nome','telefone','empresa','cidade','site','meli','amazon','obs'].forEach(k=>{
+    document.getElementById('f-'+k).value = '';
+  });
+  setFoco('');
+  editingId = null;
+  document.getElementById('editBanner').style.display = 'none';
+  document.getElementById('saveBtn').textContent = 'Salvar contato';
+}
+
+function fillForm(lead){
+  document.getElementById('f-nome').value = lead.nome || '';
+  document.getElementById('f-telefone').value = lead.telefone || '';
+  document.getElementById('f-empresa').value = lead.empresa || '';
+  document.getElementById('f-cidade').value = lead.cidade || '';
+  document.getElementById('f-site').value = lead.site || '';
+  document.getElementById('f-meli').value = lead.meli || '';
+  document.getElementById('f-amazon').value = lead.amazon || '';
+  document.getElementById('f-obs').value = lead.obs || '';
+  setFoco(lead.foco || '');
+}
+
+document.getElementById('cancelEdit').addEventListener('click', clearForm);
+
+document.getElementById('saveBtn').addEventListener('click', ()=>{
+  const data = {
+    foco: getFoco(),
+    nome: document.getElementById('f-nome').value.trim(),
+    telefone: document.getElementById('f-telefone').value.trim(),
+    empresa: document.getElementById('f-empresa').value.trim(),
+    cidade: document.getElementById('f-cidade').value.trim(),
+    site: document.getElementById('f-site').value.trim(),
+    meli: document.getElementById('f-meli').value.trim(),
+    amazon: document.getElementById('f-amazon').value.trim(),
+    obs: document.getElementById('f-obs').value.trim(),
+  };
+
+  const hasAny = Object.values(data).some(v => v !== '');
+  if(!hasAny){
+    showToast('Preencha pelo menos um campo');
+    return;
+  }
+
+  if(editingId){
+    const idx = leads.findIndex(l=>l.id===editingId);
+    if(idx>-1){ leads[idx] = {...leads[idx], ...data}; }
+    showToast('Contato atualizado ✓');
+  }else{
+    leads.unshift({ id: Date.now(), criado_em: new Date().toISOString(), ...data });
+    showToast('Contato salvo ✓');
+  }
+  persist();
+  clearForm();
+  document.getElementById('f-nome').focus();
+});
+
+// Filters
+document.querySelectorAll('.filter-chip').forEach(chip=>{
+  chip.addEventListener('click', ()=>{
+    document.querySelectorAll('.filter-chip').forEach(c=>c.classList.remove('active'));
+    chip.classList.add('active');
+    activeFilter = chip.dataset.filter;
+    renderList();
+  });
+});
+document.getElementById('searchInput').addEventListener('input', renderList);
+
+function renderList(){
+  const term = document.getElementById('searchInput').value.trim().toLowerCase();
+  const container = document.getElementById('leadList');
+  let filtered = leads.filter(l=>{
+    if(activeFilter !== 'ALL' && l.foco !== activeFilter) return false;
+    if(!term) return true;
+    return [l.nome,l.empresa,l.cidade].some(v => (v||'').toLowerCase().includes(term));
+  });
+
+  if(filtered.length === 0){
+    container.innerHTML = '<div class="empty">Nenhum contato ainda.<br>Comece pela aba + Novo.</div>';
+    return;
+  }
+
+  container.innerHTML = filtered.map(l=>{
+    const title = l.nome || l.empresa || 'Sem nome';
+    const subParts = [l.empresa && l.nome ? l.empresa : null, l.cidade, l.telefone].filter(Boolean);
+    const badge = l.foco ? `<span class="badge ${l.foco}">${l.foco}</span>` : '';
+    const detailLines = [
+      l.telefone ? `📞 ${l.telefone}` : null,
+      l.site ? `🌐 ${l.site}` : null,
+      l.meli ? `🛒 ML: ${l.meli}` : null,
+      l.amazon ? `📦 Amazon: ${l.amazon}` : null,
+      l.obs ? `📝 ${l.obs}` : null,
+    ].filter(Boolean).map(line=>`<div>${escapeHtml(line)}</div>`).join('');
+
+    return `
+      <div class="lead-card" data-id="${l.id}">
+        <div class="lead-top">
+          <div>
+            <div class="lead-name">${escapeHtml(title)}</div>
+            <div class="lead-sub">${escapeHtml(subParts.join(' · '))}</div>
+          </div>
+          ${badge}
+        </div>
+        <div class="lead-detail">${detailLines || '<div>Sem detalhes adicionais.</div>'}</div>
+        <div class="lead-actions" style="display:none;">
+          <button class="editBtn">Editar</button>
+          <button class="del delBtn">Excluir</button>
+        </div>
+      </div>`;
+  }).join('');
+
+  container.querySelectorAll('.lead-card').forEach(card=>{
+    card.addEventListener('click', (e)=>{
+      if(e.target.closest('.lead-actions')) return;
+      card.classList.toggle('open');
+      card.querySelector('.lead-actions').style.display = card.classList.contains('open') ? 'flex' : 'none';
+    });
+    card.querySelector('.editBtn').addEventListener('click', (e)=>{
+      e.stopPropagation();
+      const id = Number(card.dataset.id);
+      const lead = leads.find(l=>l.id===id);
+      if(!lead) return;
+      editingId = id;
+      fillForm(lead);
+      document.getElementById('editBanner').style.display = 'flex';
+      document.getElementById('saveBtn').textContent = 'Salvar alterações';
+      document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+      document.querySelectorAll('main section').forEach(s=>s.classList.remove('active'));
+      document.querySelector('[data-tab="novo"]').classList.add('active');
+      document.getElementById('tab-novo').classList.add('active');
+      window.scrollTo(0,0);
+    });
+    card.querySelector('.delBtn').addEventListener('click', (e)=>{
+      e.stopPropagation();
+      const id = Number(card.dataset.id);
+      leads = leads.filter(l=>l.id!==id);
+      persist();
+      renderList();
+      showToast('Contato excluído');
+    });
+  });
+}
+
+function escapeHtml(str){
+  return String(str).replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+document.getElementById('clearAllBtn').addEventListener('click', ()=>{
+  if(leads.length===0) return;
+  if(confirm('Excluir todos os ' + leads.length + ' contatos salvos neste aparelho?')){
+    leads = [];
+    persist();
+    renderList();
+    showToast('Lista limpa');
+  }
+});
+
+document.getElementById('exportBtn').addEventListener('click', ()=>{
+  if(leads.length===0){ showToast('Nada para exportar ainda'); return; }
+  const headers = ['foco','nome','telefone','empresa','cidade','site','meli','amazon','obs','criado_em'];
+  const csvEscape = v => `"${String(v||'').replace(/"/g,'""')}"`;
+  const rows = [headers.join(',')];
+  leads.slice().reverse().forEach(l=>{
+    rows.push(headers.map(h=>csvEscape(l[h])).join(','));
+  });
+  const blob = new Blob(["\uFEFF" + rows.join('\n')], {type:'text/csv;charset=utf-8;'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  const ts = new Date().toISOString().slice(0,16).replace(/[:T]/g,'-');
+  a.href = url;
+  a.download = `amigospet-leads-${ts}.csv`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  showToast('CSV exportado ✓');
+});
+
+loadLeads();
+updateCount();
+
+if('serviceWorker' in navigator){
+  window.addEventListener('load', ()=>{
+    navigator.serviceWorker.register('sw.js').catch(()=>{});
+  });
+}
+</script>
+</body>
+</html>
