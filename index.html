@@ -129,6 +129,14 @@
   .foco-btn[data-foco="LOJISTA"].active{background:var(--orange);border-color:var(--orange);color:#000;}
   .foco-btn[data-foco="OUTRO"].active{background:var(--charcoal);border-color:var(--charcoal);color:#fff;}
 
+  .reg-row{display:flex;gap:8px;}
+  .reg-btn{
+    flex:1;padding:11px 0;border-radius:var(--radius);border:1.5px solid var(--black);
+    background:var(--white);font-weight:700;font-size:0.78rem;letter-spacing:.04em;
+    text-transform:uppercase;color:var(--black);opacity:.55;cursor:pointer;font-family:var(--font);
+  }
+  .reg-btn.active{background:var(--black);color:#fff;opacity:1;}
+
   .edit-banner{
     background:var(--white);border:1.5px solid var(--black);border-left:4px solid var(--orange);
     border-radius:var(--radius);
@@ -247,6 +255,14 @@
     </div>
 
     <div class="field">
+      <label>Registrado por</label>
+      <div class="reg-row">
+        <button class="reg-btn" data-reg="DIEGO">DIEGO</button>
+        <button class="reg-btn" data-reg="LUCAS">LUCAS</button>
+      </div>
+    </div>
+
+    <div class="field">
       <label>Foco</label>
       <div class="foco-row">
         <button class="foco-btn" data-foco="SELLER">SELLER</button>
@@ -361,6 +377,29 @@ document.querySelectorAll('.tab-btn').forEach(btn=>{
   });
 });
 
+// Registrador (quem está cadastrando)
+const REG_KEY = 'amigospet_registrador';
+document.querySelectorAll('.reg-btn').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    document.querySelectorAll('.reg-btn').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    localStorage.setItem(REG_KEY, btn.dataset.reg);
+  });
+});
+function getReg(){
+  const active = document.querySelector('.reg-btn.active');
+  return active ? active.dataset.reg : '';
+}
+function setReg(val){
+  document.querySelectorAll('.reg-btn').forEach(b=>{
+    b.classList.toggle('active', b.dataset.reg === val);
+  });
+}
+function restoreReg(){
+  const saved = localStorage.getItem(REG_KEY);
+  if(saved) setReg(saved);
+}
+
 // Foco toggle
 document.querySelectorAll('.foco-btn').forEach(btn=>{
   btn.addEventListener('click', ()=>{
@@ -399,12 +438,14 @@ function fillForm(lead){
   document.getElementById('f-amazon').value = lead.amazon || '';
   document.getElementById('f-obs').value = lead.obs || '';
   setFoco(lead.foco || '');
+  if(lead.registrado_por) setReg(lead.registrado_por);
 }
 
 document.getElementById('cancelEdit').addEventListener('click', clearForm);
 
 document.getElementById('saveBtn').addEventListener('click', ()=>{
   const data = {
+    registrado_por: getReg(),
     foco: getFoco(),
     nome: document.getElementById('f-nome').value.trim(),
     telefone: document.getElementById('f-telefone').value.trim(),
@@ -462,7 +503,7 @@ function renderList(){
 
   container.innerHTML = filtered.map(l=>{
     const title = l.nome || l.empresa || 'Sem nome';
-    const subParts = [l.empresa && l.nome ? l.empresa : null, l.cidade, l.telefone].filter(Boolean);
+    const subParts = [l.empresa && l.nome ? l.empresa : null, l.cidade, l.telefone, l.registrado_por].filter(Boolean);
     const badge = l.foco ? `<span class="badge ${l.foco}">${l.foco}</span>` : '';
     const detailLines = [
       l.telefone ? `TEL ${l.telefone}` : null,
@@ -537,7 +578,7 @@ document.getElementById('clearAllBtn').addEventListener('click', ()=>{
 
 document.getElementById('exportBtn').addEventListener('click', ()=>{
   if(leads.length===0){ showToast('Nada para exportar ainda'); return; }
-  const headers = ['foco','nome','telefone','empresa','cidade','site','meli','amazon','obs','criado_em'];
+  const headers = ['registrado_por','foco','nome','telefone','empresa','cidade','site','meli','amazon','obs','criado_em'];
   const csvEscape = v => `"${String(v||'').replace(/"/g,'""')}"`;
   const rows = [headers.join(',')];
   leads.slice().reverse().forEach(l=>{
@@ -558,6 +599,7 @@ document.getElementById('exportBtn').addEventListener('click', ()=>{
 
 loadLeads();
 updateCount();
+restoreReg();
 
 if('serviceWorker' in navigator){
   window.addEventListener('load', ()=>{
